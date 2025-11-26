@@ -580,7 +580,7 @@ def run_server(
     project_root: Optional[str] = None,
     transport: str = 'stdio',
     host: str = '0.0.0.0',
-    port: int = 3333
+    port: int = 10200
 ):
     """
     启动 MCP 服务器
@@ -589,7 +589,7 @@ def run_server(
         project_root: 项目根目录路径
         transport: 传输模式，'stdio' 或 'http'
         host: HTTP模式的监听地址，默认 0.0.0.0
-        port: HTTP模式的监听端口，默认 3333
+        port: HTTP模式的监听端口，默认 10200
     """
     # 初始化工具实例
     _get_tools(project_root)
@@ -678,8 +678,8 @@ if __name__ == '__main__':
     parser.add_argument(
         '--port',
         type=int,
-        default=3333,
-        help='HTTP模式的监听端口，默认 3333'
+        default=10200,
+        help='HTTP模式的监听端口，默认 10200'
     )
     parser.add_argument(
         '--project-root',

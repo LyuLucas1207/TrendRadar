@@ -1,8 +1,11 @@
 services:
   trend-radar:
-    image: wantcat/trendradar:latest
-    container_name: trend-radar
-    restart: unless-stopped
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: Trend-Radar
+    restart: always
+    network_mode: bridge
 
     volumes:
       - ../config:/app/config:ro
@@ -47,3 +50,44 @@ services:
       - CRON_SCHEDULE=${CRON_SCHEDULE:-*/5 * * * *}
       - RUN_MODE=${RUN_MODE:-cron}
       - IMMEDIATE_RUN=${IMMEDIATE_RUN:-true}
+
+  trend-mcp:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.mcp
+    container_name: Trend-Radar-MCP
+    restart: always
+    network_mode: bridge
+
+    volumes:
+      - ../config:/app/config:ro
+      - ../output:/app/output
+
+    ports:
+      - "10200:10200"
+
+    environment:
+      - TZ=Asia/Shanghai
+      - PROJECT_ROOT=/app
+
+  trend-web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.web
+    container_name: Trend-Radar-Web
+    restart: always
+    network_mode: bridge
+
+    volumes:
+      - ../config:/app/config:ro
+      - ../output:/app/output
+
+    ports:
+      - "10199:10199"
+
+    environment:
+      - TZ=Asia/Shanghai
+      - PROJECT_ROOT=/app
+      - HOST=0.0.0.0
+      - PORT=10199
+      - DEBUG=${DEBUG:-false}

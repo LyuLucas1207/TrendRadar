@@ -1,0 +1,23 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# 安装依赖
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 安装 FastAPI 和 Uvicorn（MCP 服务器需要）
+RUN pip install --no-cache-dir fastapi uvicorn
+
+# 复制 MCP 服务器代码
+COPY mcp_server/ ./mcp_server/
+
+# 创建必要的目录
+RUN mkdir -p /app/config /app/output
+
+ENV PYTHONUNBUFFERED=1
+ENV PROJECT_ROOT=/app
+
+# MCP 服务器启动命令（指定项目根目录为 /app）
+CMD ["python", "-m", "mcp_server.server", "--transport", "http", "--host", "0.0.0.0", "--port", "10200", "--project-root", "/app"]
+

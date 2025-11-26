@@ -1700,7 +1700,7 @@ def generate_html_report(
         f.write(html_content)
 
     if is_daily_summary:
-        root_file_path = Path("index.html")
+        root_file_path = Path("output") / "index.html"
         with open(root_file_path, "w", encoding="utf-8") as f:
             f.write(html_content)
 
