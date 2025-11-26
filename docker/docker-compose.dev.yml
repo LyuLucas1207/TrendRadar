@@ -5,8 +5,9 @@ services:
       dockerfile: docker/Dockerfile
     container_name: Trend-Radar-Dev
     restart: always
-    network_mode: bridge
-
+    networks:
+      - trendradar
+      - resources
     volumes:
       - ../config:/app/config:ro
       - ../output:/app/output
@@ -48,6 +49,10 @@ services:
       - BARK_URL=${BARK_URL:-}
       # Slack配置
       - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
+      # Kafka配置
+      - KAFKA_ENABLED=${KAFKA_ENABLED:-}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-Resources-Kafka:9092}
+      - KAFKA_TOPIC=${KAFKA_TOPIC:-}
       # 运行模式
       - CRON_SCHEDULE=${CRON_SCHEDULE:-*/5 * * * *}
       - RUN_MODE=${RUN_MODE:-cron}
@@ -86,8 +91,12 @@ services:
       dockerfile: docker/Dockerfile.mcp
     container_name: Trend-Radar-MCP-Dev
     restart: always
-    network_mode: bridge
-
+    networks:
+      - trendradar
+      - resources
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     volumes:
       - ../config:/app/config:ro
       - ../output:/app/output
@@ -135,8 +144,12 @@ services:
       dockerfile: docker/Dockerfile.web
     container_name: Trend-Radar-Web-Dev
     restart: always
-    network_mode: bridge
-
+    networks:
+      - trendradar
+      - resources
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     volumes:
       - ../config:/app/config:ro
       - ../output:/app/output
@@ -170,3 +183,11 @@ services:
           ignore:
             - .git/
 
+networks:
+  trendradar:
+    driver: bridge
+    enable_ipv6: false
+    driver_opts:
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+  resources:
+    external: true

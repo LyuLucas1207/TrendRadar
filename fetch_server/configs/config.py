@@ -157,6 +157,21 @@ def load_config():
         "bark_url", ""
     )
 
+    # Kafka配置
+    kafka_config = config_data.get("kafka", {})
+    config["KAFKA_ENABLED"] = os.environ.get("KAFKA_ENABLED", "").strip().lower() in (
+        "true",
+        "1",
+    ) if os.environ.get("KAFKA_ENABLED", "").strip() else kafka_config.get("enabled", False)
+    config["KAFKA_BOOTSTRAP_SERVERS"] = (
+        os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "").strip()
+        or kafka_config.get("bootstrap_servers", "Resources-Kafka:9092")
+    )
+    config["KAFKA_TOPIC"] = (
+        os.environ.get("KAFKA_TOPIC", "").strip()
+        or kafka_config.get("topic", "trendradar.fetchdata")
+    )
+
     # 输出配置来源信息
     notification_sources = []
     if config["FEISHU_WEBHOOK_URL"]:

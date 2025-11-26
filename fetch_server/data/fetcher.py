@@ -12,6 +12,15 @@ import requests
 
 from fetch_server.configs import CONFIG
 
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "Accept": "*/*",
+    "Referer": "https://newsnow.busiyi.world/",
+    "Connection": "keep-alive",
+    "DNT": "1",
+    "X-Requested-With": "XMLHttpRequest",
+}
+
 class DataFetcher:
     """数据获取器"""
 
@@ -38,19 +47,11 @@ class DataFetcher:
         if self.proxy_url:
             proxies = {"http": self.proxy_url, "https": self.proxy_url}
 
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-            "Accept": "application/json, text/plain, */*",
-            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-            "Connection": "keep-alive",
-            "Cache-Control": "no-cache",
-        }
-
         retries = 0
         while retries <= max_retries:
             try:
                 response = requests.get(
-                    url, proxies=proxies, headers=headers, timeout=10
+                    url, proxies=proxies, headers=HEADERS, timeout=10
                 )
                 response.raise_for_status()
 

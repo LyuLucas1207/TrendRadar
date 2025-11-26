@@ -89,6 +89,15 @@ notification:
     bark_url: "" # Bark推送URL（格式：https://api.day.app/your_device_key 或自建服务器地址）
     slack_webhook_url: "" # Slack Incoming Webhook URL（格式：https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX）
 
+# Kafka 配置（可选）
+# 用于将抓取的新闻数据发送到 Kafka 消息队列
+kafka:
+  enabled: false # 是否启用 Kafka，设置为 true 后每次抓取数据会自动发送到 Kafka
+  bootstrap_servers: "Resources-Kafka:9092" # Kafka 服务器地址
+    # Docker 内部访问（推荐）: Resources-Kafka:9092 (需要加入 resources 网络)
+    # 宿主机外部访问: localhost:10109 或实际 IP:10109 (根据 Resources/docker-compose.yml 中的 KAFKA_EXTERNAL_PORT 配置)
+  topic: "trendradar.fetchdata" # Kafka topic 名称
+
 # 用于让关注度更高的新闻在更前面显示，即用算法重新组合不同平台的热搜排序形成你侧重的热搜，合起来是 1 就行
 weight:
   rank_weight: 0.6 # 排名权重
