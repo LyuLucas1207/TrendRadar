@@ -41,6 +41,10 @@ def load_frequency_words(
         group_max_count = 0  # 默认不限制
 
         for word in words:
+            # 跳过注释行（以 # 开头）
+            if word.startswith("#"):
+                continue
+            
             if word.startswith("@"):
                 # 解析最大显示数量（只接受正整数）
                 try:

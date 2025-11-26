@@ -10,6 +10,8 @@ services:
     volumes:
       - ../config:/app/config:ro
       - ../output:/app/output
+      # 挂载 fetch_server 目录以支持代码和模板文件热更新（修改代码/模板无需重启容器）
+      - ../fetch_server:/app/fetch_server
 
     environment:
       - TZ=Asia/Shanghai

@@ -55,9 +55,8 @@ RUN set -ex && \
 COPY fetch_server/requirements.txt ./fetch_server/
 RUN pip install --no-cache-dir -r fetch_server/requirements.txt
 
-# 复制 fetch_server 模块
-COPY fetch_server/ ./fetch_server/
-# 复制 main.py 到根目录（向后兼容）
+# 只复制 main.py 到根目录（启动入口，保留在镜像中）
+# fetch_server 目录通过 docker-compose.yml 挂载，支持代码和模板热更新
 COPY fetch_server/main.py ./main.py
 
 # 复制管理工具
