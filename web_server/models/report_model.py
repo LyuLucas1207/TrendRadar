@@ -228,6 +228,62 @@ class ReportModel:
             "html_files": html_files
         }
     
+    def list_output_directories(self) -> list:
+        """列出 output 目录下的所有日期文件夹
+        
+        Returns:
+            日期文件夹列表，每个元素包含：
+            {
+                "date_folder": "2025年11月26日",
+                "date_str": "20251126",
+                "url": "/report/20251126",
+                "mtime": "2025-11-26 20:30:00"
+            }
+        """
+        if not self.output_dir.exists():
+            return []
+        
+        directories = []
+        for item in self.output_dir.iterdir():
+            if not item.is_dir():
+                continue
+            
+            # 尝试解析日期文件夹名称（格式：YYYY年MM月DD日）
+            folder_name = item.name
+            date_match = self._parse_date_folder_name(folder_name)
+            
+            if date_match:
+                stat = item.stat()
+                directories.append({
+                    "date_folder": folder_name,
+                    "date_str": date_match,
+                    "url": f"/report/{date_match}",
+                    "mtime": datetime.fromtimestamp(stat.st_mtime).strftime("%Y-%m-%d %H:%M:%S")
+                })
+        
+        # 按修改时间倒序排序
+        directories.sort(key=lambda x: x["mtime"], reverse=True)
+        return directories
+    
+    @staticmethod
+    def _parse_date_folder_name(folder_name: str) -> Optional[str]:
+        """从日期文件夹名称解析出日期字符串
+        
+        Args:
+            folder_name: 日期文件夹名称，格式为 "YYYY年MM月DD日"
+        
+        Returns:
+            日期字符串，格式为 YYYYMMDD（如 "20251126"），如果格式无效则返回 None
+        """
+        import re
+        match = re.match(r'(\d{4})年(\d{2})月(\d{2})日', folder_name)
+        if match:
+            year = match.group(1)
+            month = match.group(2)
+            day = match.group(3)
+            return f"{year}{month}{day}"
+        return None
+    
     @staticmethod
     def _validate_time_format(time_str: str) -> bool:
         """验证时间格式

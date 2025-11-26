@@ -5,6 +5,7 @@ TrendRadar Web Server - 启动脚本
 """
 import os
 import sys
+from pathlib import Path
 
 # 设置项目根目录
 project_root = os.getenv("PROJECT_ROOT", "/app")
@@ -19,6 +20,22 @@ from web_server.main import app
 from web_server.config import config
 
 if __name__ == "__main__":
+    # 读取版本号
+    def _load_version():
+        """从 version 文件读取版本号"""
+        version_file = Path(project_root) / "web_server" / "version"
+        if version_file.exists():
+            try:
+                with open(version_file, "r", encoding="utf-8") as f:
+                    return f.read().strip()
+            except Exception:
+                pass
+        return "1.0.0"  # 默认版本
+
+    version = _load_version()
+
+    print("=" * 60)
+    print(f"  Web Server Version: {version}")
     print("=" * 60)
     print("  TrendRadar Web Server - MVC Architecture")
     print("=" * 60)

@@ -2,12 +2,9 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# 安装依赖
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# 安装 FastAPI 和 Uvicorn（MCP 服务器需要）
-RUN pip install --no-cache-dir fastapi uvicorn
+# 安装 mcp_server 依赖
+COPY mcp_server/requirements.txt ./mcp_server/
+RUN pip install --no-cache-dir -r mcp_server/requirements.txt
 
 # 复制 MCP 服务器代码
 COPY mcp_server/ ./mcp_server/

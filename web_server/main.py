@@ -3,6 +3,7 @@ TrendRadar Web Server - 主入口
 
 使用 MVC 三层架构的 FastAPI 应用
 """
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -10,12 +11,25 @@ from .config import config
 from .controllers import root_controller, health_controller, report_controller
 
 
+def _load_version():
+    """从 version 文件读取版本号"""
+    version_file = Path(__file__).parent / "version"
+    if version_file.exists():
+        try:
+            with open(version_file, "r", encoding="utf-8") as f:
+                return f.read().strip()
+        except Exception:
+            pass
+    return "1.0.0"  # 默认版本
+
+
 def create_app() -> FastAPI:
     """创建 FastAPI 应用实例"""
+    version = _load_version()
     app = FastAPI(
         title="TrendRadar Web Server",
         description="TrendRadar HTML 报告服务 - MVC 架构",
-        version="1.0.0",
+        version=version,
         docs_url="/docs" if config.debug else None,
         redoc_url="/redoc" if config.debug else None,
     )
@@ -44,6 +58,9 @@ app = create_app()
 if __name__ == "__main__":
     import uvicorn
     
+    version = _load_version()
+    print("=" * 60)
+    print(f"  Web Server Version: {version}")
     print("=" * 60)
     print("  TrendRadar Web Server - MVC Architecture")
     print("=" * 60)

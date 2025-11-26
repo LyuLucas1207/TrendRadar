@@ -6,6 +6,7 @@ TrendRadar MCP Server - FastMCP 2.0 实现
 """
 
 import json
+from pathlib import Path
 from typing import List, Optional, Dict
 
 from fastmcp import FastMCP
@@ -594,8 +595,27 @@ def run_server(
     # 初始化工具实例
     _get_tools(project_root)
 
+    # 读取版本号
+    def _load_version():
+        """从 version 文件读取版本号"""
+        if project_root:
+            version_file = Path(project_root) / "mcp_server" / "version"
+        else:
+            version_file = Path(__file__).parent / "version"
+        if version_file.exists():
+            try:
+                with open(version_file, "r", encoding="utf-8") as f:
+                    return f.read().strip()
+            except Exception:
+                pass
+        return "1.0.1"  # 默认版本
+
+    version = _load_version()
+
     # 打印启动信息
     print()
+    print("=" * 60)
+    print(f"  MCP Server Version: {version}")
     print("=" * 60)
     print("  TrendRadar MCP Server - FastMCP 2.0")
     print("=" * 60)

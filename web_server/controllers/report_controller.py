@@ -18,10 +18,18 @@ _report_model = ReportModel()
 _report_view = ReportView(_report_model)
 
 
-@router.get("", response_class=HTMLResponse)
+@router.get("/s", response_class=HTMLResponse)
+@router.get("/summary", response_class=HTMLResponse)
+@router.get("/index", response_class=HTMLResponse)
 async def get_latest_summary():
     """获取最新的汇总报告（从 output/index.html）"""
     return _report_view.render_latest_summary()
+
+
+@router.get("", response_class=HTMLResponse)
+async def get_output_directory():
+    """显示 output 目录列表"""
+    return _report_view.render_output_directory()
 
 
 @router.get("/{date_str}/summary", response_class=HTMLResponse)

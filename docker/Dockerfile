@@ -51,10 +51,16 @@ RUN set -ex && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# 安装 fetch_server 依赖
+COPY fetch_server/requirements.txt ./fetch_server/
+RUN pip install --no-cache-dir -r fetch_server/requirements.txt
 
-COPY main.py .
+# 复制 fetch_server 模块
+COPY fetch_server/ ./fetch_server/
+# 复制 main.py 到根目录（向后兼容）
+COPY fetch_server/main.py ./main.py
+
+# 复制管理工具
 COPY docker/manage.py .
 
 # 复制 entrypoint.sh 并强制转换为 LF 格式

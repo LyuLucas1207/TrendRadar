@@ -579,12 +579,12 @@ class DataService:
                         if item.is_file():
                             total_storage += item.stat().st_size
 
-        # 读取版本信息
-        version_file = self.parser.project_root / "version"
+        # 读取版本信息（从 mcp_server/version 文件）
+        version_file = self.parser.project_root / "mcp_server" / "version"
         version = "unknown"
         if version_file.exists():
             try:
-                with open(version_file, "r") as f:
+                with open(version_file, "r", encoding="utf-8") as f:
                     version = f.read().strip()
             except:
                 pass
