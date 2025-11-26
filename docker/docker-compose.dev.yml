@@ -1,0 +1,172 @@
+services:
+  trend-radar:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: Trend-Radar-Dev
+    restart: always
+    network_mode: bridge
+
+    volumes:
+      - ../config:/app/config:ro
+      - ../output:/app/output
+      # 挂载 fetch_server 目录以支持代码和模板文件热更新
+      - ../fetch_server:/app/fetch_server
+
+    environment:
+      - TZ=Asia/Shanghai
+      # 核心配置
+      - ENABLE_CRAWLER=${ENABLE_CRAWLER:-}
+      - ENABLE_NOTIFICATION=${ENABLE_NOTIFICATION:-}
+      - REPORT_MODE=${REPORT_MODE:-}
+      - SORT_BY_POSITION_FIRST=${SORT_BY_POSITION_FIRST:-}
+      - MAX_NEWS_PER_KEYWORD=${MAX_NEWS_PER_KEYWORD:-}
+      # 推送时间窗口
+      - PUSH_WINDOW_ENABLED=${PUSH_WINDOW_ENABLED:-}
+      - PUSH_WINDOW_START=${PUSH_WINDOW_START:-}
+      - PUSH_WINDOW_END=${PUSH_WINDOW_END:-}
+      - PUSH_WINDOW_ONCE_PER_DAY=${PUSH_WINDOW_ONCE_PER_DAY:-}
+      - PUSH_WINDOW_RETENTION_DAYS=${PUSH_WINDOW_RETENTION_DAYS:-}
+      # 通知渠道
+      - FEISHU_WEBHOOK_URL=${FEISHU_WEBHOOK_URL:-}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+      - DINGTALK_WEBHOOK_URL=${DINGTALK_WEBHOOK_URL:-}
+      - WEWORK_WEBHOOK_URL=${WEWORK_WEBHOOK_URL:-}
+      - WEWORK_MSG_TYPE=${WEWORK_MSG_TYPE:-}
+      # 邮件配置
+      - EMAIL_FROM=${EMAIL_FROM:-}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD:-}
+      - EMAIL_TO=${EMAIL_TO:-}
+      - EMAIL_SMTP_SERVER=${EMAIL_SMTP_SERVER:-}
+      - EMAIL_SMTP_PORT=${EMAIL_SMTP_PORT:-}
+      # ntfy配置
+      - NTFY_SERVER_URL=${NTFY_SERVER_URL:-https://ntfy.sh}
+      - NTFY_TOPIC=${NTFY_TOPIC:-}
+      - NTFY_TOKEN=${NTFY_TOKEN:-}
+      # Bark配置
+      - BARK_URL=${BARK_URL:-}
+      # Slack配置
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
+      # 运行模式
+      - CRON_SCHEDULE=${CRON_SCHEDULE:-*/5 * * * *}
+      - RUN_MODE=${RUN_MODE:-cron}
+      - IMMEDIATE_RUN=${IMMEDIATE_RUN:-true}
+      # 开发模式
+      - DEBUG=true
+
+    develop:
+      watch:
+        # 监听 Python 代码变化，同步文件（不重启容器）
+        - action: sync
+          path: ../fetch_server
+          target: /app/fetch_server
+          ignore:
+            - __pycache__/
+            - *.pyc
+            - .git/
+        
+        # 监听模板文件变化，同步文件（不重启容器）
+        - action: sync
+          path: ../fetch_server/utils/templates
+          target: /app/fetch_server/utils/templates
+          ignore:
+            - .git/
+        
+        # 监听配置文件变化，同步文件（不重启容器）
+        - action: sync
+          path: ../config
+          target: /app/config
+          ignore:
+            - .git/
+
+  trend-mcp:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.mcp
+    container_name: Trend-Radar-MCP-Dev
+    restart: always
+    network_mode: bridge
+
+    volumes:
+      - ../config:/app/config:ro
+      - ../output:/app/output
+      # 开发模式：挂载代码目录以支持热更新
+      - ../mcp_server:/app/mcp_server
+      - ../fetch_server:/app/fetch_server
+
+    ports:
+      - "10200:10200"
+
+    environment:
+      - TZ=Asia/Shanghai
+      - PROJECT_ROOT=/app
+      - DEBUG=true
+
+    develop:
+      watch:
+        # 监听 MCP 服务器代码变化，重启服务
+        - action: rebuild
+          path: ../mcp_server
+          ignore:
+            - __pycache__/
+            - *.pyc
+            - .git/
+        
+        # 监听 fetch_server 代码变化，同步文件
+        - action: sync
+          path: ../fetch_server
+          target: /app/fetch_server
+          ignore:
+            - __pycache__/
+            - *.pyc
+            - .git/
+        
+        # 监听配置文件变化，同步文件
+        - action: sync
+          path: ../config
+          target: /app/config
+          ignore:
+            - .git/
+
+  trend-web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.web
+    container_name: Trend-Radar-Web-Dev
+    restart: always
+    network_mode: bridge
+
+    volumes:
+      - ../config:/app/config:ro
+      - ../output:/app/output
+      # 开发模式：挂载代码目录以支持热更新
+      - ../web_server:/app/web_server
+
+    ports:
+      - "10199:10199"
+
+    environment:
+      - TZ=Asia/Shanghai
+      - PROJECT_ROOT=/app
+      - HOST=0.0.0.0
+      - PORT=10199
+      - DEBUG=true
+
+    develop:
+      watch:
+        # 监听 Web 服务器代码变化，重启服务
+        - action: rebuild
+          path: ../web_server
+          ignore:
+            - __pycache__/
+            - *.pyc
+            - .git/
+        
+        # 监听配置文件变化，同步文件
+        - action: sync
+          path: ../config
+          target: /app/config
+          ignore:
+            - .git/
+
