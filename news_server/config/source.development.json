@@ -1,0 +1,51 @@
+{
+  "postgresql": {
+    "host": "Resources-PostgreSQL",
+    "port": 5432,
+    "database": "trendradar",
+    "user": "postgres",
+    "password": "Lucas127.",
+    "enablePostgreSQL": true,
+    "max": 10,
+    "idleTimeoutMillis": 20000,
+    "connectionTimeoutMillis": 10000
+  },
+  "redis": {
+    "host": "Resources-Redis",
+    "port": 6379,
+    "db": 1,
+    "password": "Lucas127.",
+    "enableRedis": true,
+    "defaultTTL": 3600,
+    "maxRetriesPerRequest": 3,
+    "retryDelayMultiplier": 50,
+    "maxRetryDelay": 2000,
+    "connectTimeout": 10000,
+    "lazyConnect": false
+  },
+  "kafka": {
+    "bootstrapServers": "Resources-Kafka:9092",
+    "clientId": "source-service",
+    "enableKafka": true,
+    "topic": "trendradar.source",
+    "groupId": "trendradar-source-service",
+    "noPartitionerWarning": true,
+    "sessionTimeout": 30000,
+    "heartbeatInterval": 3000,
+    "retries": 3,
+    "initialRetryTime": 100,
+    "multiplier": 2
+  },
+  "server": {
+    "port": 3002,
+    "host": "0.0.0.0"
+  },
+  "features": {
+    "enableCache": true,
+    "initTable": false
+  },
+  "defaultTTL": 1800000,
+  "productHunt": {
+    "apiToken": "q5DKESAN-6RQK8YgYxv1I3CHimhYVM9RdmP0LDuCoIE"
+  }
+}

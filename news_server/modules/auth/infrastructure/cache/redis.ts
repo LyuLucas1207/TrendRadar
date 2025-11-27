@@ -4,7 +4,6 @@
  */
 import { RedisClient } from '@packages/redisx/client'
 import type { ICacheRepository } from '../../domain/cache/repository'
-import { consola } from 'consola'
 
 export class RedisCacheRepository implements ICacheRepository {
   constructor(private readonly redisClient: RedisClient) {}
