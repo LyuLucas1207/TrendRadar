@@ -96,7 +96,28 @@ kafka:
   bootstrap_servers: "Resources-Kafka:9092" # Kafka 服务器地址
     # Docker 内部访问（推荐）: Resources-Kafka:9092 (需要加入 resources 网络)
     # 宿主机外部访问: localhost:10109 或实际 IP:10109 (根据 Resources/docker-compose.yml 中的 KAFKA_EXTERNAL_PORT 配置)
-  topic: "trendradar.fetchdata" # Kafka topic 名称
+  event_topic: "trendradar.crawl_server" # 事件 topic（参考 Sjgz-Backend 设计）
+  event_poison_topic: "trendradar.crawl_server_poison" # 死信队列 topic
+  consumer_group_id: "trendradar-crawl-server" # 消费者组 ID
+
+# PostgreSQL 配置（可选）
+# 用于存储和查询数据
+postgresql:
+  enabled: false # 是否启用 PostgreSQL
+  host: "localhost" # 数据库主机
+  port: 5432 # 数据库端口
+  database: "trendradar" # 数据库名称
+  user: "postgres" # 用户名
+  password: "" # 密码
+
+# Redis 配置（可选）
+# 用于缓存 frequency_words 等数据
+redis:
+  enabled: false # 是否启用 Redis
+  host: "localhost" # Redis 主机
+  port: 6379 # Redis 端口
+  db: 0 # 数据库编号
+  password: "" # 密码（可选）
 
 # 用于让关注度更高的新闻在更前面显示，即用算法重新组合不同平台的热搜排序形成你侧重的热搜，合起来是 1 就行
 weight:
@@ -104,27 +125,40 @@ weight:
   frequency_weight: 0.3 # 频次权重
   hotness_weight: 0.1 # 热度权重
 
-# name 可以定义任意名称，只具有显示作用，即使项目运行了几天后，忽然改掉 name 也不会影响代码的正常运行
-platforms:
-  - id: "toutiao"
-    name: "今日头条"
-  - id: "baidu"
-    name: "百度热搜"
-  - id: "wallstreetcn-hot"
-    name: "华尔街见闻"
-  - id: "thepaper"
-    name: "澎湃新闻"
-  - id: "bilibili-hot-search"
-    name: "bilibili 热搜"
-  - id: "cls-hot"
-    name: "财联社热门"
-  - id: "ifeng"
-    name: "凤凰网"
-  - id: "tieba"
-    name: "贴吧"
-  - id: "weibo"
-    name: "微博"
-  - id: "douyin"
-    name: "抖音"
-  - id: "zhihu"
-    name: "知乎"
+# 定时任务配置
+schedule:
+  minutes: 15 # 定时执行间隔（分钟），默认 15 分钟
+
+# ============================================
+# 平台配置（已迁移到数据库）
+# ============================================
+# 注意：平台数据已迁移到 PostgreSQL 数据库的 platforms 表
+# 请使用 insert_platforms.sql 脚本初始化平台数据
+# 此配置仅作为 fallback（当数据库未启用或没有数据时使用）
+# 
+# 如需修改平台配置，请直接在数据库中更新 platforms 表
+# 或执行 scripts/insert_platforms.sql 脚本
+# ============================================
+# platforms:
+#   - id: "toutiao"
+#     name: "今日头条"
+#   - id: "baidu"
+#     name: "百度热搜"
+#   - id: "wallstreetcn-hot"
+#     name: "华尔街见闻"
+#   - id: "thepaper"
+#     name: "澎湃新闻"
+#   - id: "bilibili-hot-search"
+#     name: "bilibili 热搜"
+#   - id: "cls-hot"
+#     name: "财联社热门"
+#   - id: "ifeng"
+#     name: "凤凰网"
+#   - id: "tieba"
+#     name: "贴吧"
+#   - id: "weibo"
+#     name: "微博"
+#   - id: "douyin"
+#     name: "抖音"
+#   - id: "zhihu"
+#     name: "知乎"

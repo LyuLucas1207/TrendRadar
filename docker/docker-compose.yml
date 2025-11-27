@@ -14,8 +14,8 @@ services:
     volumes:
       - ../config:/app/config:ro
       - ../output:/app/output
-      # 挂载 fetch_server 目录以支持代码和模板文件热更新（修改代码/模板无需重启容器）
-      - ../fetch_server:/app/fetch_server
+      # 挂载 crawl_server 目录以支持代码热更新（修改代码无需重启容器）
+      - ../crawl_server:/app/crawl_server
     environment:
       - TZ=Asia/Shanghai
       # 核心配置
@@ -24,6 +24,12 @@ services:
       - REPORT_MODE=${REPORT_MODE:-}
       - SORT_BY_POSITION_FIRST=${SORT_BY_POSITION_FIRST:-}
       - MAX_NEWS_PER_KEYWORD=${MAX_NEWS_PER_KEYWORD:-}
+      - REQUEST_INTERVAL=${REQUEST_INTERVAL:-}
+      - RANK_THRESHOLD=${RANK_THRESHOLD:-}
+      - USE_PROXY=${USE_PROXY:-}
+      - DEFAULT_PROXY=${DEFAULT_PROXY:-}
+      - VERSION_CHECK_URL=${VERSION_CHECK_URL:-}
+      - SHOW_VERSION_UPDATE=${SHOW_VERSION_UPDATE:-}
       # 推送时间窗口
       - PUSH_WINDOW_ENABLED=${PUSH_WINDOW_ENABLED:-}
       - PUSH_WINDOW_START=${PUSH_WINDOW_START:-}
@@ -52,18 +58,37 @@ services:
       # Slack配置
       - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
       # Kafka配置
-      # KAFKA_ENABLED: 是否启用 Kafka（true/false），启用后每次抓取数据会自动发送到 Kafka
-      # KAFKA_BOOTSTRAP_SERVERS: Kafka 服务器地址
-      #   - Docker 内部（推荐）: Resources-Kafka:9092 (需要加入 resources 网络)
-      #   - 宿主机外部: localhost:10109 或实际 IP:10109
-      # KAFKA_TOPIC: Kafka topic 名称，默认为 trendradar.fetchdata
-      - KAFKA_ENABLED=${KAFKA_ENABLED:-}
-      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-}
-      - KAFKA_TOPIC=${KAFKA_TOPIC:-}
-      # 运行模式
-      - CRON_SCHEDULE=${CRON_SCHEDULE:-*/5 * * * *}
-      - RUN_MODE=${RUN_MODE:-cron}
-      - IMMEDIATE_RUN=${IMMEDIATE_RUN:-true}
+      - KAFKA_ENABLED=${KAFKA_ENABLED}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+      - KAFKA_EVENT_TOPIC=${KAFKA_EVENT_TOPIC}
+      - KAFKA_EVENT_POISON_TOPIC=${KAFKA_EVENT_POISON_TOPIC}
+      - KAFKA_CONSUMER_GROUP_ID=${KAFKA_CONSUMER_GROUP_ID}
+      # PostgreSQL配置
+      - POSTGRESQL_ENABLED=${POSTGRESQL_ENABLED}
+      - POSTGRESQL_HOST=${POSTGRESQL_HOST}
+      - POSTGRESQL_PORT=${POSTGRESQL_PORT}
+      - POSTGRESQL_DATABASE=${POSTGRESQL_DATABASE}
+      - POSTGRESQL_USER=${POSTGRESQL_USER}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      # Redis配置
+      - REDIS_ENABLED=${REDIS_ENABLED}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_DB=${REDIS_DB}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      # 定时任务配置（分钟数）
+      - SCHEDULE_MINUTES=${SCHEDULE_MINUTES}
+      # 消息批处理配置
+      - MESSAGE_BATCH_SIZE=${MESSAGE_BATCH_SIZE:-}
+      - DINGTALK_BATCH_SIZE=${DINGTALK_BATCH_SIZE:-}
+      - FEISHU_BATCH_SIZE=${FEISHU_BATCH_SIZE:-}
+      - BARK_BATCH_SIZE=${BARK_BATCH_SIZE:-}
+      - BATCH_SEND_INTERVAL=${BATCH_SEND_INTERVAL:-}
+      - FEISHU_MESSAGE_SEPARATOR=${FEISHU_MESSAGE_SEPARATOR:-}
+      # 权重配置
+      - RANK_WEIGHT=${RANK_WEIGHT:-}
+      - FREQUENCY_WEIGHT=${FREQUENCY_WEIGHT:-}
+      - HOTNESS_WEIGHT=${HOTNESS_WEIGHT:-}
 
   trend-mcp:
     build:
