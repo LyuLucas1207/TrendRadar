@@ -5,7 +5,10 @@
     "database": "trendradar",
     "user": "postgres",
     "password": "Lucas127.",
-    "enablePostgreSQL": true
+    "enablePostgreSQL": true,
+    "max": 10,
+    "idleTimeoutMillis": 20000,
+    "connectionTimeoutMillis": 10000
   },
   "redis": {
     "host": "Resources-Redis",
@@ -13,7 +16,12 @@
     "db": 1,
     "password": "Lucas127.",
     "enableRedis": true,
-    "defaultTTL": 3600
+    "defaultTTL": 3600,
+    "maxRetriesPerRequest": 3,
+    "retryDelayMultiplier": 50,
+    "maxRetryDelay": 2000,
+    "connectTimeout": 10000,
+    "lazyConnect": false
   },
   "kafka": {
     "bootstrapServers": "Resources-Kafka:9092",

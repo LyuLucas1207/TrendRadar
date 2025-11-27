@@ -11,5 +11,8 @@ export const PostgreSQLConfigSchema: z.ZodType<PostgreSQLConfig> = z.object({
   user: z.string().min(1, 'PostgreSQL user is required'),
   password: z.string().min(1, 'PostgreSQL password is required'),
   enablePostgreSQL: z.boolean().optional(),
+  max: z.number().int().positive('PostgreSQL max connections must be > 0').optional(),
+  idleTimeoutMillis: z.number().int().nonnegative('PostgreSQL idleTimeoutMillis must be >= 0').optional(),
+  connectionTimeoutMillis: z.number().int().positive('PostgreSQL connectionTimeoutMillis must be > 0').optional(),
 })
 

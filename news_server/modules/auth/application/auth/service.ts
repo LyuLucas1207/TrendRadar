@@ -12,9 +12,9 @@ export class AuthService {
   public readonly githubLogin: GitHubLogin
 
   constructor(
-    private readonly userRepository: IUserRepository,
-    private readonly githubOAuth: GitHubOAuthClient,
-    private readonly jwtService: JWTService
+    userRepository: IUserRepository,
+    githubOAuth: GitHubOAuthClient,
+    jwtService: JWTService
   ) {
     this.githubLogin = new GitHubLogin(userRepository, githubOAuth, jwtService)
   }

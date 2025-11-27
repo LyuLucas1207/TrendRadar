@@ -3,8 +3,9 @@
  * 使用 pg + drizzle-orm
  */
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 import { consola } from 'consola'
+import { initPostgreSQL } from './init'
 
 export interface PostgreSQLConfig {
   host: string
@@ -13,6 +14,10 @@ export interface PostgreSQLConfig {
   user: string
   password: string
   enablePostgreSQL?: boolean
+  // 连接池配置
+  max?: number // 最大连接数，默认 10
+  idleTimeoutMillis?: number // 空闲连接超时时间（毫秒），默认 20000
+  connectionTimeoutMillis?: number // 连接超时时间（毫秒），默认 10000
 }
 
 export class PostgreSQLClient {
@@ -27,22 +32,12 @@ export class PostgreSQLClient {
 
     if (this.enablePostgreSQL) {
       try {
-        this.pool = new Pool({
-          host: config.host,
-          port: config.port,
-          database: config.database,
-          user: config.user,
-          password: config.password,
-          max: 10,
-          idleTimeoutMillis: 20000,
-          connectionTimeoutMillis: 10000,
-        })
-        
-        this.db = drizzle(this.pool)
+        const { pool, db } = initPostgreSQL(config)
+        this.pool = pool
+        this.db = db
       } catch (error) {
-        consola.error(`❌ PostgreSQL 初始化失败:`, error)
         this.enablePostgreSQL = false
-        throw new Error(`PostgreSQL 初始化失败: ${error instanceof Error ? error.message : String(error)}`)
+        throw error
       }
     }
   }

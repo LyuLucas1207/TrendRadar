@@ -11,7 +11,7 @@ export class UserService {
   public readonly getUserData: GetUserData
   public readonly setUserData: SetUserData
 
-  constructor(private readonly userRepository: IUserRepository) {
+  constructor(userRepository: IUserRepository) {
     this.getUserData = new GetUserData(userRepository)
     this.setUserData = new SetUserData(userRepository)
   }
