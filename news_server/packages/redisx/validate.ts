@@ -10,5 +10,6 @@ export const RedisConfigSchema: z.ZodType<RedisConfig> = z.object({
   db: z.number().int().nonnegative('Redis db must be >= 0').optional(),
   password: z.string().optional(),
   enableRedis: z.boolean().optional(),
+  defaultTTL: z.number().int().positive('Redis defaultTTL must be > 0').optional(),
 })
 

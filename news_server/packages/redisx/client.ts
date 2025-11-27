@@ -11,13 +11,16 @@ export interface RedisConfig {
   db?: number
   password?: string
   enableRedis?: boolean
+  defaultTTL?: number // 默认存储时间（秒），如果未指定则不过期
 }
 
 export class RedisClient {
   private client: Redis | null = null
   public enableRedis: boolean
+  private defaultTTL: number | undefined
 
   constructor(config: RedisConfig) {
+    this.defaultTTL = config.defaultTTL
     this.enableRedis = config.enableRedis ?? false
 
     if (this.enableRedis) {
@@ -72,8 +75,10 @@ export class RedisClient {
       return false
     }
     try {
-      if (ex) {
-        await this.client.setex(key, ex, value)
+      // 使用传入的 TTL，如果没有则使用默认 TTL
+      const ttl = ex ?? this.defaultTTL
+      if (ttl) {
+        await this.client.setex(key, ttl, value)
       } else {
         await this.client.set(key, value)
       }

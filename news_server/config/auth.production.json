@@ -12,14 +12,21 @@
     "port": 6379,
     "db": 1,
     "password": "Lucas127.",
-    "enableRedis": true
+    "enableRedis": true,
+    "defaultTTL": 3600
   },
   "kafka": {
     "bootstrapServers": "Resources-Kafka:9092",
     "clientId": "auth-service",
     "enableKafka": true,
     "topic": "trendradar.auth",
-    "groupId": "trendradar-auth-service"
+    "groupId": "trendradar-auth-service",
+    "noPartitionerWarning": true,
+    "sessionTimeout": 30000,
+    "heartbeatInterval": 3000,
+    "retries": 3,
+    "initialRetryTime": 100,
+    "multiplier": 2
   },
   "github": {
     "clientId": "Ov23liOgO6WgrbCp7mXC",
