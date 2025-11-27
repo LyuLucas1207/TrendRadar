@@ -52,3 +52,9 @@ _image/
 *.tmp
 *.bak
 
+# Node.js
+node_modules/
+news_server/node_modules/
+*.tsbuildinfo
+dist/
+

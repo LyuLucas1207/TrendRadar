@@ -1,0 +1,20 @@
+FROM node:24-alpine
+
+# 安装必要的系统依赖
+RUN apk add --no-cache \
+    dumb-init
+
+# 设置工作目录
+WORKDIR /app
+
+# 复制 package.json 和 package-lock.json
+COPY news_server/package*.json ./
+
+# 安装所有依赖（包括 devDependencies，因为需要 tsx）
+RUN npm install --include=dev && \
+    npm cache clean --force
+
+# 注意：源代码、dist、config 通过 volumes 挂载
+# node_modules 不挂载，使用镜像中安装的依赖
+
+ENTRYPOINT ["dumb-init", "--"]

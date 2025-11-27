@@ -39,13 +39,11 @@ def get_news_analyzer(
     
     if singleton:
         if _news_analyzer_instance is None:
-            logger.debug("创建 NewsAnalyzer 单例实例")
             if not crawl_config:
                 raise RuntimeError("CrawlConfig 未提供，无法创建 NewsAnalyzer")
             _news_analyzer_instance = NewsAnalyzer(crawl_config=crawl_config, db_config=db_config)
         return _news_analyzer_instance
     else:
-        logger.debug("创建新的 NewsAnalyzer 实例")
         if not crawl_config:
             raise RuntimeError("CrawlConfig 未提供，无法创建 NewsAnalyzer")
         return NewsAnalyzer(crawl_config=crawl_config, db_config=db_config)
