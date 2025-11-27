@@ -5,7 +5,7 @@
  */
 import { NewDeps, type AuthDependencies } from './wiring'
 import { NewEventBusServer } from '../presentation/eventbus/server'
-import type { AuthConfig } from '../config/types'
+import type { AuthConfig } from '../config/config'
 import { consola } from 'consola'
 
 export async function RunWorker(config: AuthConfig): Promise<{ deps: AuthDependencies; server: ReturnType<typeof NewEventBusServer> }> {

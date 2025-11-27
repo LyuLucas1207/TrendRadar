@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "dev:auth:api": "tsx watch inputs/auth/api/main.ts",
-    "dev:auth:pipeline": "tsx watch inputs/auth/pipeline/main.ts",
+    "dev:auth:api": "NODE_OPTIONS='--trace-warnings' tsx watch inputs/auth/api/main.ts",
+    "dev:auth:pipeline": "NODE_OPTIONS='--trace-warnings' tsx watch inputs/auth/pipeline/main.ts",
     "dev:news:api": "tsx watch inputs/news/api/main.ts",
     "dev:news:pipeline": "tsx watch inputs/news/pipeline/main.ts",
     "dev:source:api": "tsx watch inputs/source/api/main.ts",

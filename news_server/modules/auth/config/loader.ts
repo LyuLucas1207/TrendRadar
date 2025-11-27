@@ -3,7 +3,7 @@
  * 类似 Sjgz-Backend 的 internal/user/config/config.go
  */
 import { createConfigLoader, type LoaderOptions } from '@packages/configx/loader'
-import { AuthConfig } from './types'
+import { AuthConfig } from './config'
 import { consola } from 'consola'
 import { resolve } from 'path'
 import { existsSync } from 'fs'

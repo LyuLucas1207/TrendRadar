@@ -8,7 +8,7 @@ import { GitHubOAuthClient } from '../infrastructure/external/github/oauth'
 import { JWTService } from '../domain/auth/jwt'
 import { AuthService } from '../application/auth/service'
 import { UserService } from '../application/user/service'
-import type { AuthConfig } from '../config/types'
+import type { AuthConfig } from '../config/config'
 import { consola } from 'consola'
 
 export class AuthDependencies {

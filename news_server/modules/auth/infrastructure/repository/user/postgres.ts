@@ -11,6 +11,7 @@ import type { UserRO } from '../../../domain/user/read_model'
 import type { UserCreateWO, UserUpdateWO } from '../../../domain/user/write_model'
 import { initUserTable } from './init-table'
 import { addUser as addUserOp } from './operations/add-user'
+import { upsertUser as upsertUserOp } from './operations/upsert-user'
 import { getUser as getUserOp } from './operations/get-user'
 import { setUserData as setUserDataOp } from './operations/set-data'
 import { getUserData as getUserDataOp } from './operations/get-data'
@@ -25,6 +26,10 @@ export class UserRepository implements IUserRepository {
 
   async addUser(wo: UserCreateWO): Promise<UserRO> {
     return addUserOp(this.db, wo)
+  }
+
+  async upsertUser(wo: UserCreateWO): Promise<UserRO> {
+    return upsertUserOp(this.db, wo)
   }
 
   async getUser(id: string): Promise<UserRO | null> {

@@ -6,7 +6,7 @@
 import type { FastifyInstance } from 'fastify'
 import { NewDeps, type AuthDependencies } from './wiring'
 import { NewHTTPServer } from '../presentation/http/server'
-import type { AuthConfig } from '../config/types'
+import type { AuthConfig } from '../config/config'
 import { consola } from 'consola'
 
 export async function RunAPI(

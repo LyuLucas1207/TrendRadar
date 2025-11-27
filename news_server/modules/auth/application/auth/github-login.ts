@@ -38,20 +38,21 @@ export class GitHubLogin {
       type: 'github',
     }
 
-    // 4. 保存或更新用户 (WO → Repository → RO)
-    const userRO = await this.userRepository.addUser(wo)
-
-    // 5. 生成 JWT Token
+    // 4. 登录时添加或更新用户 (WO → Repository → RO)
+    // 使用 upsertUser：如果用户不存在则创建，存在则更新
+    const userRO = await this.userRepository.upsertUser(wo)
+    
+    // 5. 生成 JWT Token（使用数据库返回的用户信息）
     const jwt = await this.jwtService.generateToken({
-      id: userId,
-      type: 'github',
+      id: userRO.id,
+      type: userRO.type,
     })
 
     return {
       jwt,
       user: {
-        id: userId,
-        avatar: githubUser.avatar_url,
+        id: userRO.id,
+        avatar: githubUser.avatar_url, // avatar 和 name 不在数据库中，从 GitHub 获取
         name: githubUser.name,
       },
     }

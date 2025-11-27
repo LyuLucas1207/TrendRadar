@@ -12,10 +12,18 @@ export interface IUserRepository {
   init(): Promise<void>
 
   /**
-   * 添加或更新用户
+   * 添加用户（纯添加）
+   * 如果用户已存在则抛出错误
    * 返回 Read Model (RO)
    */
   addUser(wo: UserCreateWO): Promise<UserRO>
+
+  /**
+   * 添加或更新用户（Upsert）
+   * 用于登录场景：如果用户不存在则创建，存在则更新
+   * 返回 Read Model (RO)
+   */
+  upsertUser(wo: UserCreateWO): Promise<UserRO>
 
   /**
    * 根据 ID 获取用户
