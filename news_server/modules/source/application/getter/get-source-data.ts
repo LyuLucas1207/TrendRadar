@@ -2,13 +2,18 @@
  * 获取源数据用例（Getter 模式）
  * 类似 Sjgz-Backend 的 application/getter/get_data.go
  * 
- * 当前实现：使用 getter 获取源数据，仅缓存到 Redis，不存储到数据库
- * 未来扩展：会在 application/source/ 下添加新的用例，用于将 fetch 到的数据存储到数据库 table
+ * 当前实现：使用 getter 获取源数据，缓存到 Redis，并发送到 Kafka
  */
 import type { IGetterRepository } from '../../domain/getter/repository'
 import type { IGetterRegistry } from '../../domain/getter/registry'
 import type { ICacheRepository } from '../../domain/cache/repository'
 import type { NewsItem } from '../../domain/newsitem/entity'
+import type { KafkaClient } from '@packages/kafkax/client'
+import type { KafkaConfig } from '@packages/kafkax/client'
+import { TopicKeys } from '@events/topics'
+import { EventTypes } from '@events/events'
+import type { SourceDataFetchedEvent } from '@events/source'
+import { consola } from 'consola'
 
 export interface GetSourceDataParams {
   sourceId: string
@@ -28,7 +33,9 @@ export class GetSourceData {
     private readonly getterRepository: IGetterRepository,
     private readonly getterRegistry: IGetterRegistry,
     private readonly cacheRepository: ICacheRepository,
-    private readonly defaultTTL: number = 30 * 60 * 1000 // 默认 30 分钟
+    private readonly defaultTTL: number = 30 * 60 * 1000, // 默认 30 分钟
+    private readonly kafkaClient?: KafkaClient,
+    private readonly kafkaConfig?: KafkaConfig
   ) {}
 
   async execute(params: GetSourceDataParams): Promise<GetSourceDataResult> {
@@ -100,6 +107,42 @@ export class GetSourceData {
       // 这里我们直接 await，因为不是 Cloudflare Worker 环境
       if (limitedItems.length > 0) {
         await this.cacheRepository.set(effectiveId, limitedItems)
+
+        // 发送到 Kafka（如果配置了 Kafka）
+        if (this.kafkaClient && this.kafkaConfig && this.kafkaClient.enableKafka) {
+          try {
+            const topicName = this.kafkaConfig.producerTopics?.[TopicKeys.NEWS]
+            if (topicName) {
+              const eventData: SourceDataFetchedEvent = {
+                sourceId: effectiveId,
+                items: limitedItems.map(item => ({
+                  id: item.id,
+                  title: item.title,
+                  url: item.url,
+                  mobileUrl: item.mobileUrl,
+                  pubDate: item.pubDate,
+                  extra: item.extra,
+                })),
+                timestamp: now,
+              }
+
+              await this.kafkaClient.send(topicName, [
+                {
+                  key: effectiveId,
+                  value: eventData,
+                  headers: {
+                    eventType: EventTypes.SOURCE_DATA_FETCHED,
+                  },
+                },
+              ])
+
+              consola.success(`✅ [Source] 已发送 ${limitedItems.length} 条数据到 Kafka topic: ${topicName}`)
+            }
+          } catch (error) {
+            consola.error(`❌ [Source] 发送到 Kafka 失败:`, error)
+            // 不抛出错误，避免影响主流程
+          }
+        }
       }
 
       return {

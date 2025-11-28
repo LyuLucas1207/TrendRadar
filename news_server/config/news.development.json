@@ -1,0 +1,68 @@
+{
+  "postgresql": {
+    "host": "localhost",
+    "port": 5432,
+    "database": "trendradar",
+    "user": "postgres",
+    "password": "Lucas127.",
+    "enablePostgreSQL": true,
+    "max": 10,
+    "idleTimeoutMillis": 20000,
+    "connectionTimeoutMillis": 10000
+  },
+  "redis": {
+    "host": "localhost",
+    "port": 6379,
+    "db": 1,
+    "password": "Lucas127.",
+    "enableRedis": true,
+    "defaultTTL": 3600,
+    "maxRetriesPerRequest": 3,
+    "retryDelayMultiplier": 50,
+    "maxRetryDelay": 2000,
+    "connectTimeout": 10000,
+    "lazyConnect": false
+  },
+  "kafka": {
+    "bootstrapServers": "localhost:9092",
+    "clientId": "news-service",
+    "enableKafka": true,
+    "noPartitionerWarning": true,
+    "producer": {
+      "acks": "all",
+      "compression": "snappy",
+      "retries": 3,
+      "batchBytes": 1048576,
+      "lingerMs": 5,
+      "idempotent": true
+    },
+    "consumer": {
+      "groupId": "trendradar-news-service",
+      "initialOffset": "latest",
+      "sessionTimeout": 30000,
+      "heartbeatInterval": 3000,
+      "fetchMinBytes": 1,
+      "fetchMaxBytes": 5242880
+    },
+    "producerTopics": {
+      "news": "trendradar.news",
+      "news_poison": "trendradar.news_poison"
+    },
+    "consumerTopics": {
+      "news": "trendradar.news",
+      "news_poison": "trendradar.news_poison"
+    }
+  },
+  "server": {
+    "port": 3003,
+    "host": "0.0.0.0"
+  },
+  "features": {
+    "enableCache": true,
+    "initTable": true
+  },
+  "productHunt": {
+    "apiToken": "q5DKESAN-6RQK8YgYxv1I3CHimhYVM9RdmP0LDuCoIE"
+  }
+}
+

@@ -3,6 +3,7 @@
  * 类似 Sjgz-Backend 的 wiring.go
  */
 import { RedisClient } from '@packages/redisx/client'
+import { KafkaClient } from '@packages/kafkax/client'
 import { RedisCacheRepository } from '../infrastructure/cache/redis'
 import { MemoryGetterRepository } from '../infrastructure/repository/getter/memory'
 import { createSourceGetterRegistry } from '../infrastructure/getters/index'
@@ -14,6 +15,7 @@ import { consola } from 'consola'
 export class SourceDependencies {
   constructor(
     public readonly redisClient: RedisClient,
+    public readonly kafkaClient: KafkaClient | null,
     public readonly cacheRepository: ICacheRepository,
     public readonly getterRepository: MemoryGetterRepository,
     public readonly getterRegistry: ReturnType<typeof createSourceGetterRegistry>,
@@ -22,6 +24,9 @@ export class SourceDependencies {
 
   async cleanup() {
     await this.redisClient.close()
+    if (this.kafkaClient) {
+      await this.kafkaClient.disconnect()
+    }
     consola.info('Source dependencies cleaned up')
   }
 }
@@ -31,6 +36,23 @@ export async function NewDeps(config: SourceConfig): Promise<SourceDependencies>
   const redisClient = new RedisClient(config.toRedisConfig())
   if (!redisClient.enableRedis) throw new Error('Redis 未启用，无法启动服务')
   await redisClient.ensureConnected()
+
+  // 初始化 Kafka（如果启用）
+  let kafkaClient: KafkaClient | null = null
+  if (config.kafka.enableKafka) {
+    kafkaClient = new KafkaClient(config.kafka)
+    try {
+      await kafkaClient.connect()
+      // 确保 producer topic 存在
+      const topicName = config.kafka.producerTopics?.['news']
+      if (topicName) {
+        await kafkaClient.ensureTopicExists(topicName)
+      }
+    } catch (error) {
+      consola.error('Kafka 连接失败:', error)
+      throw error
+    }
+  }
 
   // 初始化缓存仓储
   const cacheRepository = new RedisCacheRepository(redisClient)
@@ -46,11 +68,14 @@ export async function NewDeps(config: SourceConfig): Promise<SourceDependencies>
     getterRepository,
     getterRegistry,
     cacheRepository,
-    config.defaultTTL
+    config.defaultTTL,
+    kafkaClient || undefined,
+    config.kafka
   )
 
   return new SourceDependencies(
     redisClient,
+    kafkaClient,
     cacheRepository,
     getterRepository,
     getterRegistry,

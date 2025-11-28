@@ -270,6 +270,61 @@ services:
       - trendradar
       - resources
 
+  # News API 服务
+  news-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.news.news
+    image: trend-news-news-api:prod
+    container_name: Trend-News-News-API
+    restart: always
+    command: ["npm", "run", "dev:news:api"]
+    environment:
+      - NODE_ENV=production
+      - KAFKAJS_NO_PARTITIONER_WARNING=1
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    expose:
+      - "3003"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.news.rule=PathPrefix(`/news`)"
+      - "traefik.http.routers.news.entrypoints=web"
+      - "traefik.http.services.news.loadbalancer.server.port=3003"
+    volumes:
+      - ../news_server:/app
+      # 排除 node_modules，使用镜像中安装的依赖
+      - /app/node_modules
+    depends_on: []
+    networks:
+      - trendradar
+      - resources
+
+  # News Pipeline 服务（Kafka Worker）
+  news-pipeline:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.news.news
+    image: trend-news-news-pipeline:prod
+    container_name: Trend-News-News-Pipeline
+    restart: always
+    command: ["npm", "run", "dev:news:pipeline"]
+    environment:
+      - NODE_ENV=production
+      - KAFKAJS_NO_PARTITIONER_WARNING=1
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    volumes:
+      - ../news_server:/app
+      # 排除 node_modules，使用镜像中安装的依赖
+      - /app/node_modules
+    depends_on: []
+    networks:
+      - trendradar
+      - resources
+
 
 networks:
   trendradar:

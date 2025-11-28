@@ -1,24 +1,70 @@
 /**
  * Kafka 客户端封装
  * 使用 kafkajs
+ * 类似 Sjgz-Backend 的 pkg/kafkax/types.go
  */
-import { Kafka, Producer, Admin, Consumer } from 'kafkajs'
+import { Kafka, Producer, Admin, Consumer, type ProducerRecord, type Message, type RecordMetadata, type IHeaders } from 'kafkajs'
 import { consola } from 'consola'
+import type { TopicKey } from '../../events/topics'
+import { initKafka } from './init'
 
+/**
+ * Producer 配置
+ */
+export interface ProducerConfig {
+  acks?: 'all' | '0' | '1' | '-1'
+  compression?: 'none' | 'gzip' | 'snappy' | 'lz4' | 'zstd'
+  retries?: number
+  batchBytes?: number
+  lingerMs?: number
+  idempotent?: boolean
+}
+
+/**
+ * Consumer 配置
+ */
+export interface ConsumerConfig {
+  groupId?: string
+  initialOffset?: 'earliest' | 'latest'
+  sessionTimeout?: number // 会话超时时间（毫秒），默认 30000
+  heartbeatInterval?: number // 心跳间隔（毫秒），默认 3000
+  fetchMinBytes?: number
+  fetchMaxBytes?: number
+  returnErrors?: boolean
+}
+
+/**
+ * Kafka 配置
+ * 区分 Producer Topics 和 Consumer Topics
+ * 类似 Sjgz-Backend 的 pkg/kafkax/types.go
+ */
 export interface KafkaConfig {
   bootstrapServers: string
   enableKafka?: boolean
-  clientId?: string
-  topic?: string
-  groupId?: string
+  clientId: string
   noPartitionerWarning?: boolean
+  // Producer 配置
+  producer?: ProducerConfig
   // Consumer 配置
-  sessionTimeout?: number // 会话超时时间（毫秒），默认 30000
-  heartbeatInterval?: number // 心跳间隔（毫秒），默认 3000
+  consumer?: ConsumerConfig
+  // Producer Topics (服务发布的事件)
+  producerTopics?: Record<TopicKey, string>
+  // Consumer Topics (服务监听的事件)
+  consumerTopics?: Record<TopicKey, string>
   // Retry 配置
   retries?: number // 重试次数，默认 3
   initialRetryTime?: number // 初始重试时间（毫秒），默认 100
   multiplier?: number // 重试时间倍数，默认 2
+}
+
+/**
+ * Kafka 发送消息类型
+ * 用于 send 方法的参数
+ */
+export interface KafkaMessage {
+  key?: string | Buffer
+  value: string | object
+  headers?: IHeaders
 }
 
 export class KafkaClient {
@@ -33,35 +79,11 @@ export class KafkaClient {
 
     if (this.enableKafka) {
       try {
-        // 设置环境变量以消除 partitioner 警告
-        if (config.noPartitionerWarning !== false) {
-          process.env.KAFKAJS_NO_PARTITIONER_WARNING = '1'
-        }
-        
-        const brokers = config.bootstrapServers.split(',').map(s => s.trim())
-        
-        this.kafka = new Kafka({
-          clientId: config.clientId || 'news-server',
-          brokers,
-          retry: {
-            retries: config.retries ?? 3,
-            initialRetryTime: config.initialRetryTime ?? 100,
-            multiplier: config.multiplier ?? 2,
-          },
-        })
-        
-        this.producer = this.kafka.producer()
-        this.admin = this.kafka.admin()
-        
-        // 如果提供了 groupId，创建 Consumer
-        if (config.groupId) {
-          this.consumer = this.kafka.consumer({
-            groupId: config.groupId,
-            sessionTimeout: config.sessionTimeout ?? 30000,
-            heartbeatInterval: config.heartbeatInterval ?? 3000,
-          })
-        }
-        
+        const { kafka, producer, admin, consumer } = initKafka(config)
+        this.kafka = kafka
+        this.producer = producer
+        this.admin = admin
+        this.consumer = consumer
         consola.success(`✅ Kafka 客户端初始化成功: ${config.bootstrapServers}`)
       } catch (error) {
         consola.error(`❌ Kafka 初始化失败:`, error)
@@ -89,20 +111,30 @@ export class KafkaClient {
     }
   }
 
-  async send(topic: string, messages: Array<{ key?: string; value: string | object }>) {
+  /**
+   * 发送消息到 Kafka
+   * 使用 kafkajs 官方类型定义
+   * @param topic Topic 名称
+   * @param messages 消息数组，value 可以是 string 或 object（会自动序列化为 JSON）
+   * @returns Promise<RecordMetadata[]> 发送结果元数据
+   */
+  async send(topic: string, messages: KafkaMessage[]): Promise<RecordMetadata[]> {
     if (!this.enableKafka || !this.producer) {
       throw new Error('Kafka 未启用或未初始化')
     }
 
-    const formattedMessages = messages.map(msg => ({
-      key: msg.key,
-      value: typeof msg.value === 'string' ? msg.value : JSON.stringify(msg.value),
+    const formattedMessages: Message[] = messages.map(msg => ({
+      key: msg.key ? (typeof msg.key === 'string' ? Buffer.from(msg.key) : msg.key) : null,
+      value: typeof msg.value === 'string' ? Buffer.from(msg.value) : Buffer.from(JSON.stringify(msg.value)),
+      headers: msg.headers,
     }))
 
-    await this.producer.send({
+    const record: ProducerRecord = {
       topic,
       messages: formattedMessages,
-    })
+    }
+
+    return await this.producer.send(record)
   }
 
   async ensureTopicExists(topic: string, numPartitions: number = 3, replicationFactor: number = 1) {
@@ -153,6 +185,14 @@ export class KafkaClient {
       throw new Error('Kafka Consumer 未启用或未初始化，请确保配置了 groupId')
     }
     return this.consumer
+  }
+
+  /**
+   * 根据 TopicKey 获取 Topic 名称
+   * 从配置的 producerTopics 或 consumerTopics 中查找
+   */
+  getTopicName(key: TopicKey, config: KafkaConfig): string | undefined {
+    return config.producerTopics?.[key] || config.consumerTopics?.[key]
   }
 
   /**

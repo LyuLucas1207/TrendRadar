@@ -27,11 +27,25 @@
     "bootstrapServers": "Resources-Kafka:9092",
     "clientId": "source-service",
     "enableKafka": true,
-    "topic": "trendradar.source",
-    "groupId": "trendradar-source-service",
     "noPartitionerWarning": true,
-    "sessionTimeout": 30000,
-    "heartbeatInterval": 3000,
+    "producer": {
+      "acks": "all",
+      "compression": "snappy",
+      "retries": 3,
+      "idempotent": true
+    },
+    "consumer": {
+      "groupId": "trendradar-source-service",
+      "initialOffset": "latest",
+      "sessionTimeout": 30000,
+      "heartbeatInterval": 3000
+    },
+    "producerTopics": {
+      "news": "trendradar.news"
+    },
+    "consumerTopics": {
+      "source": "trendradar.source"
+    },
     "retries": 3,
     "initialRetryTime": 100,
     "multiplier": 2

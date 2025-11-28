@@ -27,11 +27,22 @@
     "bootstrapServers": "Resources-Kafka:9092",
     "clientId": "auth-service",
     "enableKafka": true,
-    "topic": "trendradar.auth",
-    "groupId": "trendradar-auth-service",
     "noPartitionerWarning": true,
-    "sessionTimeout": 30000,
-    "heartbeatInterval": 3000,
+    "producer": {
+      "acks": "all",
+      "compression": "snappy",
+      "retries": 3,
+      "idempotent": true
+    },
+    "consumer": {
+      "groupId": "trendradar-auth-service",
+      "initialOffset": "latest",
+      "sessionTimeout": 30000,
+      "heartbeatInterval": 3000
+    },
+    "consumerTopics": {
+      "auth": "trendradar.auth"
+    },
     "retries": 3,
     "initialRetryTime": 100,
     "multiplier": 2

@@ -7,8 +7,8 @@
   "scripts": {
     "dev:auth:api": "NODE_OPTIONS='--trace-warnings --no-warnings=TimeoutNegativeWarning' tsx watch inputs/auth/api/main.ts",
     "dev:auth:pipeline": "NODE_OPTIONS='--trace-warnings --no-warnings=TimeoutNegativeWarning' tsx watch inputs/auth/pipeline/main.ts",
-    "dev:news:api": "tsx watch inputs/news/api/main.ts",
-    "dev:news:pipeline": "tsx watch inputs/news/pipeline/main.ts",
+    "dev:news:api": "NODE_OPTIONS='--trace-warnings --no-warnings=TimeoutNegativeWarning' tsx watch inputs/news/api/main.ts",
+    "dev:news:pipeline": "NODE_OPTIONS='--trace-warnings --no-warnings=TimeoutNegativeWarning' tsx watch inputs/news/pipeline/main.ts",
     "dev:source:api": "NODE_OPTIONS='--trace-warnings --no-warnings=TimeoutNegativeWarning' tsx watch inputs/source/api/main.ts",
     "dev:source:pipeline": "NODE_OPTIONS='--trace-warnings --no-warnings=TimeoutNegativeWarning' tsx watch inputs/source/pipeline/main.ts",
     "build": "tsc",

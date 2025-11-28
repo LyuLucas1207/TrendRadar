@@ -6,6 +6,7 @@ import { KafkaClient, type KafkaConfig } from '@packages/kafkax/client'
 import { Registry } from './registry'
 import { Router } from './router'
 import { AuthHandler } from './handler/auth'
+import { TopicKeys } from '@events/topics'
 import { consola } from 'consola'
 
 export interface EventBusServerConfig {
@@ -29,8 +30,14 @@ export class EventBusServer {
       return
     }
 
+    // 获取 consumer topic
+    const topicName = this.config.kafka.consumerTopics?.[TopicKeys.AUTH]
+    if (!topicName) {
+      throw new Error('Kafka consumer topic not found for auth service')
+    }
+
     // 确保 topic 存在
-    if (this.config.kafka.topic) await this.kafkaClient.ensureTopicExists(this.config.kafka.topic)
+    await this.kafkaClient.ensureTopicExists(topicName)
     this.router.RegisterRoutes()
   
     const consumer = this.kafkaClient.getConsumer()
@@ -38,11 +45,8 @@ export class EventBusServer {
 
     consola.success('Kafka Consumer 已连接')
 
-    if (!this.config.kafka.topic) {
-      throw new Error('Kafka topic is required')
-    }
-    await consumer.subscribe({ topic: this.config.kafka.topic, fromBeginning: false })
-    consola.info(`已订阅 topic: ${this.config.kafka.topic}`)
+    await consumer.subscribe({ topic: topicName, fromBeginning: false })
+    consola.info(`已订阅 topic: ${topicName}`)
 
     // 开始消费消息
     await consumer.run({
