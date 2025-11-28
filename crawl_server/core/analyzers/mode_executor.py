@@ -170,12 +170,18 @@ class ModeExecutor:
             if mode_strategy["should_send_realtime"]:
                 # 如果已经发送了实时通知，汇总只生成HTML不发送通知
                 summary_html = self.report_generator.generate_summary_html(
-                    mode_strategy["summary_mode"]
+                    mode_strategy["summary_mode"],
+                    platforms=platforms,
+                    word_groups=word_groups,
+                    filter_words=filter_words
                 )
             else:
                 # daily模式：直接生成汇总报告并发送通知
                 summary_html = self.report_generator.generate_summary_report(
-                    mode_strategy
+                    mode_strategy,
+                    platforms=platforms,
+                    word_groups=word_groups,
+                    filter_words=filter_words
                 )
 
         # 打开浏览器（仅在非容器环境）

@@ -35,7 +35,7 @@ class ReportGenerator:
         self.notifier = Notifier(report_mode, proxy_url)
         self.update_info = update_info
 
-    def generate_summary_report(self, mode_strategy: Dict) -> Optional[str]:
+    def generate_summary_report(self, mode_strategy: Dict, platforms=None, word_groups=None, filter_words=None) -> Optional[str]:
         """生成汇总报告（带通知）"""
         summary_type = (
             "当前榜单汇总" if mode_strategy["summary_mode"] == "current" else "当日汇总"
@@ -43,7 +43,7 @@ class ReportGenerator:
         print(f"生成{summary_type}报告...")
 
         # 加载分析数据
-        analysis_data = DataLoader.load_analysis_data()
+        analysis_data = DataLoader.load_analysis_data(platforms=platforms, word_groups=word_groups, filter_words=filter_words)
         if not analysis_data:
             return None
 
@@ -79,13 +79,13 @@ class ReportGenerator:
 
         return html_file
 
-    def generate_summary_html(self, mode: str = "daily") -> Optional[str]:
+    def generate_summary_html(self, mode: str = "daily", platforms=None, word_groups=None, filter_words=None) -> Optional[str]:
         """生成汇总HTML"""
         summary_type = "当前榜单汇总" if mode == "current" else "当日汇总"
         print(f"生成{summary_type}HTML...")
 
         # 加载分析数据
-        analysis_data = DataLoader.load_analysis_data()
+        analysis_data = DataLoader.load_analysis_data(platforms=platforms, word_groups=word_groups, filter_words=filter_words)
         if not analysis_data:
             return None
 
