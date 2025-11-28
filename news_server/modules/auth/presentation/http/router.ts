@@ -24,17 +24,17 @@ export class Router {
     })
 
     // GitHub OAuth 回调
-    this.app.get<{ Querystring: GitHubCallbackQuery }>('/api/oauth/github', async (request, reply) => {
+    this.app.get<{ Querystring: GitHubCallbackQuery }>('/auth/api/oauth/github', async (request, reply) => {
       return this.handlers.Auth.githubCallback(request, reply)
     })
 
     // 获取用户数据
-    this.app.get<{ Params: GetUserDataParams }>('/api/me/:id', async (request, reply) => {
+    this.app.get<{ Params: GetUserDataParams }>('/auth/api/me/:id', async (request, reply) => {
       return this.handlers.Auth.getUserData(request, reply)
     })
 
     // 设置用户数据
-    this.app.post<{ Params: SetUserDataParams; Body: SetUserDataBody }>('/api/me/:id', async (request, reply) => {
+    this.app.post<{ Params: SetUserDataParams; Body: SetUserDataBody }>('/auth/api/me/:id', async (request, reply) => {
       return this.handlers.Auth.setUserData(request, reply)
     })
   }

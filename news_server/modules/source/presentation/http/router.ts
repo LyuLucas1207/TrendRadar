@@ -14,7 +14,7 @@ export class Router {
 
   RegisterRoutes() {
     // 获取源数据
-    this.app.get<{ Querystring: GetSourceDataQuery }>('/api/s', async (request, reply) => {
+    this.app.get<{ Querystring: GetSourceDataQuery }>('/source/api/s', async (request, reply) => {
       return this.handlers.Source.getSourceData(request, reply)
     })
   }
